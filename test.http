@@ -1,0 +1,11 @@
+POST http://localhost:8000/api/notification HTTP/1.1
+content-type: application/json
+
+{
+    "id": "1",
+    "content": "Hello",
+    "receiver":{
+        "name":"Jonny",
+        "number":"808034"
+    }
+}
