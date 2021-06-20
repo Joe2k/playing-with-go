@@ -2,17 +2,23 @@ package main
 
 import (
 	"log"
-	"net/http"
+	"os"
 
-	"github.com/Joe2k/playing-with-go/handlers"
-	"github.com/gorilla/mux"
+	"github.com/Joe2k/playing-with-go/app"
+	"github.com/joho/godotenv"
 )
 
 func main() {
-	r := mux.NewRouter()
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 
-	r.HandleFunc("/api/notification", handlers.GetNotifications).Methods("GET")
-	r.HandleFunc("/api/notification", handlers.CreateNotification).Methods("POST")
-
-	log.Fatal(http.ListenAndServe(":8000", r))
+	a := app.App{}
+	a.Initialize(
+		os.Getenv("APP_DB_USERNAME"),
+		os.Getenv("APP_DB_PASSWORD"),
+		os.Getenv("APP_DB_NAME"),
+	)
+	a.Run(":5000")
 }
