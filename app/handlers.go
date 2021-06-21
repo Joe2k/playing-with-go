@@ -11,6 +11,8 @@ import (
 	_ "github.com/lib/pq"
 )
 
+// Main Handlers
+
 func (a *App) getNotification(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
@@ -48,8 +50,21 @@ func (a *App) createNotification(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondWithJSON(w, http.StatusOK, n)
+	respondWithJSON(w, http.StatusCreated, n)
 }
+
+func (a *App) getNotifications(w http.ResponseWriter, r *http.Request) {
+	notifications, err := data.GetNotifications(a.DB)
+
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, notifications)
+}
+
+// Helper Funcitions
 
 func respondWithError(w http.ResponseWriter, code int, message string) {
 	respondWithJSON(w, code, map[string]string{"error": message})
