@@ -64,6 +64,33 @@ func (a *App) getNotifications(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, notifications)
 }
 
+func (a *App) updateNotification(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "Invalid notification ID")
+		return
+	}
+
+	var n data.Notification
+	decoder := json.NewDecoder(r.Body)
+
+	if err := decoder.Decode(&n); err != nil {
+		respondWithError(w, http.StatusBadRequest, "Invalid request payload")
+		return
+	}
+	defer r.Body.Close()
+
+	n.ID = id
+
+	if err := n.UpdateNotification(a.DB); err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, n)
+}
+
 // Helper Funcitions
 
 func respondWithError(w http.ResponseWriter, code int, message string) {

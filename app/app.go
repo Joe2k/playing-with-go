@@ -35,6 +35,7 @@ func (a *App) Run(addr string) {
 
 func (a *App) initializeRoutes() {
 	a.Router.HandleFunc("/notification/{id:[0-9]+}", a.getNotification).Methods("GET")
+	a.Router.HandleFunc("/notification/{id:[0-9]+}", a.updateNotification).Methods("PUT")
 	a.Router.HandleFunc("/notification", a.createNotification).Methods("POST")
 	a.Router.HandleFunc("/notifications", a.getNotifications).Methods("GET")
 }

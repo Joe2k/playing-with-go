@@ -83,6 +83,40 @@ func TestGetProduct(t *testing.T) {
 	checkResponseCode(t, http.StatusOK, response.Code)
 }
 
+func TestUpdateProduct(t *testing.T) {
+	clearTable()
+	addProducts(1)
+
+	req, _ := http.NewRequest("GET", "/notification/1", nil)
+	response := executeRequest(req)
+
+	var originalNotification map[string]interface{}
+	json.Unmarshal(response.Body.Bytes(), &originalNotification)
+
+	var jsonStr = []byte(`{"number":123456, "message":"New Updated Message"}`)
+	req, _ = http.NewRequest("PUT", "/notification/1", bytes.NewBuffer(jsonStr))
+	req.Header.Set("Content-Type", "application/json")
+
+	response = executeRequest(req)
+
+	checkResponseCode(t, http.StatusOK, response.Code)
+
+	var n map[string]interface{}
+	json.Unmarshal(response.Body.Bytes(), &n)
+
+	if n["id"] != originalNotification["id"] {
+		t.Errorf("Expected the id to remain the same (%v). Got %v", originalNotification["id"], n["id"])
+	}
+
+	if n["number"] == originalNotification["number"] {
+		t.Errorf("Expected the number to change from '%v' to '%v'. Got '%v'", originalNotification["number"], n["number"], n["number"])
+	}
+
+	if n["message"] == originalNotification["message"] {
+		t.Errorf("Expected the message to change from '%v' to '%v'. Got '%v'", originalNotification["message"], n["message"], n["message"])
+	}
+}
+
 func TestGetNonExistentProduct(t *testing.T) {
 	clearTable()
 
