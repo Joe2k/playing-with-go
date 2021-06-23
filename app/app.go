@@ -8,11 +8,19 @@ import (
 
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 type App struct {
 	Router *mux.Router
 	DB     *sql.DB
+}
+
+func init() {
+	prometheus.Register(totalRequests)
+	prometheus.Register(responseStatus)
+	prometheus.Register(httpDuration)
 }
 
 func (a *App) Initialize(user, password, dname string) {
@@ -26,6 +34,7 @@ func (a *App) Initialize(user, password, dname string) {
 	a.ensureTableExists()
 
 	a.Router = mux.NewRouter()
+	a.Router.Use(prometheusMiddleware)
 	a.initializeRoutes()
 }
 
@@ -38,6 +47,7 @@ func (a *App) initializeRoutes() {
 	a.Router.HandleFunc("/notification/{id:[0-9]+}", a.updateNotification).Methods("PUT")
 	a.Router.HandleFunc("/notification", a.createNotification).Methods("POST")
 	a.Router.HandleFunc("/notifications", a.getNotifications).Methods("GET")
+	a.Router.Path("/prometheus").Handler(promhttp.Handler())
 }
 
 func (a *App) ensureTableExists() {
